@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <nav>
-        <a href="index.html">Home</a>   |
-        <a href="login.html">Login</a>  |
+        <a href="index.html">Home</a> |
+        <a href="login.html">Login</a> |
         <a href="register.html">Register</a>
     </nav>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <h1>Register</h1>
-    
-    <form action="login.html" method="get">
+
+    <form onsubmit="return validateForm(event)">
         <label for="username">Username: </label>
         <input type="text" id="username" name="username" required>
         <br><br>
-        <label for="email">Email:   </label>
+        <label for="email">Email: </label>
         <input type="email" id="email" name="email" required>
         <br><br>
         <label for="password">Password: </label>
@@ -29,9 +31,75 @@
         <br><br>
         <button type="submit">Register</button>
     </form>
-    
+
     Already have an account?
     <br>
     <a href="login.html">Login here</a>.
+
+    <p id="message-display" class="error"></p>
 </body>
+<script>
+    function validateForm(event) {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var confirm = document.getElementById("confirm_password").value;
+        var display = document.getElementById("message-display");
+
+        display.textContent = "";
+        display.className = "error";
+
+        if (username.length < 8) {
+            event.preventDefault();
+            display.textContent = "Username must be at least 8 characters long";
+            return false;
+        }
+        if (password.length < 8) {
+            event.preventDefault();
+            display.textContent = "Password must be at least 8 characters long";
+            return false;
+        }
+        if (password !== confirm) {
+            event.preventDefault();
+            display.textContent = "Passwords do not match";
+            return false;
+        }
+        return storePasswords(event);
+    }
+
+    function storePasswords(event) {
+        event.preventDefault();
+
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var confirm = document.getElementById("confirm_password").value;
+        var email = document.getElementById("email").value;
+        var display = document.getElementById("message-display");
+
+        var savedProfiles = JSON.parse(localStorage.getItem("profiles") || "[]");
+        for (var i = 0; i < savedProfiles.length; i++) {
+            if (savedProfiles[i].username === username) {
+                event.preventDefault();
+                display.textContent = "Username already exists";
+                return false;
+            }
+        }
+        var newProfile = {
+            username: username,
+            password: password,
+            email: email
+        };
+
+        savedProfiles.push(newProfile);
+        localStorage.setItem("profiles", JSON.stringify(savedProfiles));
+
+        display.className = "success";
+        display.textContent = "Registration successful! Redirecting...";
+
+        setTimeout(function() {
+            window.location.href = "login.html";
+        }, 1500);
+        return true;
+    }   
+</script>
+
 </html>
