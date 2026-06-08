@@ -50,8 +50,7 @@
     var studentIndex = null;
 
     window.onload = function() {
-        var urlParams = new URLSearchParams(window.location.search);
-        studentIndex = urlParams.get('id');
+        studentIndex = new URLSearchParams(window.location.search).get('id');
 
         if (studentIndex === null) {
             alert("No student selected!");
