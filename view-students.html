@@ -17,48 +17,60 @@
     <table border="2">
         <thead>
             <tr>
-                <th>Student</th>
-                <th>Age</th>
-                <th>Grade</th>
+                <th>Name</th>
+                <th>Roll Number</th>
+                <th>CGPA</th>
+                <th>Branch</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>John Doe</td>
-                <td>20</td>
-                <td>A</td>
-                <td><a href="edit-students.html">Edit</a>  <a href="delete-students.html">Delete</a></td>
-            </tr>
-        </tbody>
-        <tbody>
-            <tr>
-                <td>Jane Stilwell</td>
-                <td>20</td>
-                <td>B</td>
-                <td><a href="edit-students.html">Edit</a> <a href="delete-students.html">Delete</a></td>
-            </tr>
-        </tbody>
-        <tbody>
-            <tr>
-                <td>Max Monroe</td>
-                <td>19</td>
-                <td>B</td>
-                <td><a href="edit-students.html">Edit</a> <a href="delete-students.html">Delete</a></td>
-            </tr>
-            <tr>
-                <td>Lucy Chen</td>
-                <td>19</td>
-                <td>O</td>
-                <td><a href="edit-students.html">Edit</a> <a href="delete-students.html">Delete</a></td>
-            </tr>
-            <tr>
-                <td>Tim Bradford</td>
-                <td>21</td>
-                <td>C</td>
-                <td><a href="edit-students.html">Edit</a> <a href="delete-students.html">Delete</a></td>
-            </tr>
         </tbody>
     </table>
 </body>
+<script>
+    window.onload = function() {
+        displayStudents();
+    };
+
+    function displayStudents() {
+        var tbody = document.querySelector("tbody");
+        
+        tbody.innerHTML = "";
+        var students = JSON.parse(localStorage.getItem("students") || "[]");
+        if (students.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No student records found.</td></tr>";
+            return;
+        }
+        for (var i = 0; i < students.length; i++) {
+            var student = students[i];
+
+            var row = document.createElement("tr");
+
+            row.innerHTML = 
+                "<td>" + student.name + "</td>" +
+                "<td>" + student.roll + "</td>" +
+                "<td>" + student.cgpa + "</td>" +
+                "<td>" + student.branch + "</td>" +
+                "<td><button onclick='editStudent(" + i + ")'>Edit</button>"+
+                "<button onclick='deleteStudent(" + i + ")'>Delete</button></td>";
+
+            tbody.appendChild(row);
+        }
+    }
+
+    function deleteStudent(index) {
+        var students = JSON.parse(localStorage.getItem("students") || "[]");
+        
+        students.splice(index, 1);
+        
+        localStorage.setItem("students", JSON.stringify(students));
+        displayStudents();
+    }
+
+    function editStudent(index) {
+        window.location.href = "edit-students.html?id="+index;
+    }
+</script>
+
 </html>
