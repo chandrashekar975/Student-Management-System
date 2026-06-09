@@ -41,6 +41,7 @@
 <script>
     function validateForm(event) {
         var username = document.getElementById("username").value;
+        var email = document.getElementById("email").value;
         var password = document.getElementById("password").value;
         var confirm = document.getElementById("confirm_password").value;
         var display = document.getElementById("message-display");
@@ -49,12 +50,19 @@
         display.className = "error";
         event.preventDefault();
 
-        if (username.length < 8) {
-            display.textContent = "Username must be at least 8 characters long";
+        var userexp = /^[A-Za-z0-9]{8,}$/;
+        if (!userexp.test(username)) {
+            display.textContent = "Invalid Username! Username must be at least 8 characters long and contain only alphanumeric characters";
             return false;
         }
-        if (password.length < 8) {
-            display.textContent = "Password must be at least 8 characters long";
+        var passwordexp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        if (!passwordexp.test(password)) {
+            display.textContent = "Invalid Password! Password must be at least 8 characters long and contain at least one uppercase letter, lowercase letter, number, and special character.";
+            return false;
+        }
+        var emailexp = /^[^@]+@[^@]+\.[a-zA-Z]{2,}$/;
+        if (!emailexp.test(email)) {
+            display.textContent = "Invalid Email!";
             return false;
         }
         if (password !== confirm) {
@@ -91,7 +99,7 @@
         display.className = "success";
         display.textContent = "Registration successful! Redirecting...";
 
-        setTimeout(function() {
+        setTimeout(function () {
             window.location.href = "login.html";
         }, 1500);
         return true;

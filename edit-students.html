@@ -1,27 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Students</title>
     <nav>
-        <a href="dashboard.html">Dashboard</a>   |
-        <a href="add-students.html">Add Students</a>  |
+        <a href="dashboard.html">Dashboard</a> |
+        <a href="add-students.html">Add Students</a> |
         <a href="view-students.html">View Students</a> |
         <a href="logout.html">Logout</a>
     </nav>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <h1>Edit Student</h1>
-    
+
     <form onsubmit="return updateStudent(event)">
         <label for="name">Name:</label><br>
         <input type="text" id="name" name="name" required><br><br>
-        
+
         <label for="roll">Roll Number:</label><br>
         <input type="text" id="roll" name="roll" required><br><br>
-        
+
         <label for="cgpa">CGPA:</label><br>
         <input type="number" id="cgpa" name="cgpa" step="0.01" min="0" max="10" required><br><br>
 
@@ -40,16 +42,16 @@
             <option value="CSE-DS">CSE-DS</option>
             <option value="CSE-CS">CSE-CS</option>
         </select><br><br>
-        
+
         <button type="submit">Update Student</button>
-    </form> 
+    </form>
 
     <p id="message-display" class="error"></p>
 </body>
 <script>
     var studentIndex = null;
 
-    window.onload = function() {
+    window.onload = function () {
         studentIndex = new URLSearchParams(window.location.search).get('id');
 
         if (studentIndex === null) {
@@ -73,11 +75,24 @@
         var display = document.getElementById("message-display");
 
         var updatedName = document.getElementById("name").value;
-        var updatedRoll = document.getElementById("roll").value;
+        var updatedRoll = document.getElementById("roll").value.toUpperCase();
         var updatedCgpa = document.getElementById("cgpa").value;
         var updatedBranch = document.getElementById("branch").value;
 
         var students = JSON.parse(localStorage.getItem("students") || "[]");
+
+        var rollexp = /^[0-9]{2}[A-Z0-9]{4}[0-9]{2}[A-Z0-9]{2}$/;
+        if (!rollexp.test(updatedRoll)) {
+            display.textContent = "Invalid Roll Number";
+            return false;
+        }
+
+        for (var i = 0; i < students.length; i++) {
+            if (students[i].roll === updatedRoll && i !== parseInt(studentIndex)) {
+                display.textContent = "Roll number already exists";
+                return false;
+            }
+        }
 
         students[studentIndex] = {
             name: updatedName,
@@ -91,11 +106,12 @@
         display.className = "success";
         display.textContent = "Student record updated successfully! Redirecting...";
 
-        setTimeout(function() {
+        setTimeout(function () {
             window.location.href = "view-students.html";
         }, 1500);
 
         return true;
     }
 </script>
+
 </html>

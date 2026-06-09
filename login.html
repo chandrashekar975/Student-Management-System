@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <nav>
-        <a href="index.html">Home</a>   |
-        <a href="login.html">Login</a>  |
+        <a href="index.html">Home</a> |
+        <a href="login.html">Login</a> |
         <a href="register.html">Register</a>
     </nav>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <h1>Login</h1>
     <form onsubmit="return validateForm(event)">
@@ -27,41 +29,40 @@
 
 </body>
 <script>
-    function validateForm(event){
+    function validateForm(event) {
         var username = document.getElementById("username").value;
         var password = document.getElementById("password").value;
         var display = document.getElementById("message-display");
 
         display.textContent = "";
-        display.className = "error"; 
-
-        if(username.length < 8){
-            event.preventDefault();
-            display.textContent = "Username must be at least 8 characters long";
+        display.className = "error";
+        var userexp = /^[A-Za-z0-9]{8,}$/;
+        if (!userexp.test(username)) {
+            display.textContent = "Invalid Username! Username must be at least 8 characters long and contain only alphanumeric characters";
             return false;
         }
-        if(password.length < 8){
-            event.preventDefault();
-            display.textContent = "Password must be at least 8 characters long";
+        var passwordexp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        if (!passwordexp.test(password)) {
+            display.textContent = "Invalid Password! Password must be at least 8 characters long and contain at least one uppercase letter, lowercase letter, number, and special character.";
             return false;
         }
         return checkCredentials(event);
     }
 
-    function checkCredentials(event){
+    function checkCredentials(event) {
         var savedProfiles = JSON.parse(localStorage.getItem("profiles") || "[]");
         var username = document.getElementById("username").value;
         var password = document.getElementById("password").value;
         var display = document.getElementById("message-display");
-        
-        for(var i = 0; i < savedProfiles.length; i++){
-            if(savedProfiles[i].username == username && savedProfiles[i].password == password){
+
+        for (var i = 0; i < savedProfiles.length; i++) {
+            if (savedProfiles[i].username == username && savedProfiles[i].password == password) {
                 event.preventDefault();
-                
+
                 display.className = "success";
                 display.textContent = "Login successful! Redirecting...";
-                
-                setTimeout(function() {
+
+                setTimeout(function () {
                     window.location.href = "dashboard.html";
                 }, 1500);
                 return true;
@@ -72,4 +73,5 @@
         return false;
     }
 </script>
+
 </html>
