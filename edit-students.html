@@ -49,37 +49,48 @@
     <p id="message-display" class="error"></p>
 </body>
 <script>
-    var studentIndex = null;
+    var studentId = null;
 
-    window.onload = function () {
-        studentIndex = new URLSearchParams(window.location.search).get('id');
+    window.onload = async function () {
+        studentId = new URLSearchParams(window.location.search).get('id');
 
-        if (studentIndex === null) {
+        if (studentId === null) {
             alert("No student selected!");
             window.location.href = "view-students.html";
             return;
         }
 
-        var students = JSON.parse(localStorage.getItem("students") || "[]");
-        var student = students[studentIndex];
+        try {
+            var response = await fetch("http://localhost:8080/students/" + studentId);
 
-        document.getElementById("name").value = student.name;
-        document.getElementById("roll").value = student.roll;
-        document.getElementById("cgpa").value = student.cgpa;
-        document.getElementById("branch").value = student.branch;
+            if (response.ok) {
+                var student = await response.json();
+
+                document.getElementById("name").value = student.name;
+                document.getElementById("roll").value = student.roll;
+                document.getElementById("cgpa").value = student.cgpa;
+                document.getElementById("branch").value = student.branch;
+            } else {
+                alert("Error: Could not retrieve student data from the server.");
+                window.location.href = "view-students.html";
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Cannot connect to backend server.");
+        }
     };
 
-    function updateStudent(event) {
+    async function updateStudent(event) {
         event.preventDefault();
 
         var display = document.getElementById("message-display");
+        display.textContent = "";
+        display.className = "error";
 
         var updatedName = document.getElementById("name").value;
         var updatedRoll = document.getElementById("roll").value.toUpperCase();
         var updatedCgpa = document.getElementById("cgpa").value;
         var updatedBranch = document.getElementById("branch").value;
-
-        var students = JSON.parse(localStorage.getItem("students") || "[]");
 
         var rollexp = /^[0-9]{2}[A-Z0-9]{4}[0-9]{2}[A-Z0-9]{2}$/;
         if (!rollexp.test(updatedRoll)) {
@@ -87,28 +98,36 @@
             return false;
         }
 
-        for (var i = 0; i < students.length; i++) {
-            if (students[i].roll === updatedRoll && i !== parseInt(studentIndex)) {
-                display.textContent = "Roll number already exists";
-                return false;
-            }
-        }
-
-        students[studentIndex] = {
+        var updated = {
             name: updatedName,
             roll: updatedRoll,
-            cgpa: updatedCgpa,
+            cgpa: parseFloat(updatedCgpa),
             branch: updatedBranch
         };
 
-        localStorage.setItem("students", JSON.stringify(students));
+        try {
+            var response = await fetch("http://localhost:8080/students/" + studentId, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(updated)
+            });
 
-        display.className = "success";
-        display.textContent = "Student record updated successfully! Redirecting...";
+            if (response.ok) {
+                display.className = "success";
+                display.textContent = "Student record updated successfully! Redirecting...";
 
-        setTimeout(function () {
-            window.location.href = "view-students.html";
-        }, 1500);
+                setTimeout(function () {
+                    window.location.href = "view-students.html";
+                }, 1500);
+            } else {
+                display.textContent = "Server error: Failed to update student records.";
+            }
+        } catch (error) {
+            console.error(error);
+            display.textContent = "Connection lost. Please verify backend state.";
+        }
 
         return true;
     }

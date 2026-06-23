@@ -47,36 +47,57 @@
     <p id="message-display" class="error"></p>
 </body>
 <script>
-    function addStudent(event) {
+    async function addStudent(event) {
         event.preventDefault();
 
         var display = document.getElementById("message-display");
         display.textContent = "";
+        display.className = "error";
+
 
         var name = document.getElementById("name").value;
         var roll = document.getElementById("roll").value.toUpperCase();
         var cgpa = document.getElementById("cgpa").value;
         var branch = document.getElementById("branch").value;
-        var students = JSON.parse(localStorage.getItem("students") || "[]");
+
         var rollexp = /^[0-9]{2}[A-Z0-9]{4}[0-9]{2}[A-Z0-9]{2}$/;
         if (!rollexp.test(roll)) {
             display.textContent = "Invalid Roll Number";
             return false;
         }
-        for (var i = 0; i < students.length; i++) {
-            if (students[i].roll === roll) {
-                display.textContent = "Roll number already exists";
-                return false;
-            }
+        
+        var student = {
+            name: name,
+            roll: roll,
+            cgpa: parseFloat(cgpa),
+            branch: branch
         }
-        students.push({ name: name, roll: roll, cgpa: cgpa, branch: branch });
-        localStorage.setItem("students", JSON.stringify(students));
 
-        display.className = "success";
-        display.textContent = "Student added successfully ! Redirecting...";
-        setTimeout(function () {
-            window.location.href = "view-students.html";
-        }, 1500);
+        try {
+            var response = await fetch(
+                "http://localhost:8080/students",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(student)
+                });
+
+            if (response.ok) {
+                display.className = "success";
+                display.textContent = "Student added successfully! Redirecting...";
+                setTimeout(function () {
+                    window.location.href = "view-students.html";
+                }, 1500);
+            } else {
+                display.textContent = "Server error: Could not save student details.";
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+            display.textContent = "Connection failed. Please check if the database is running.";
+        }
+
         return true;
     }
 </script>

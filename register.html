@@ -69,39 +69,46 @@
             display.textContent = "Passwords do not match";
             return false;
         }
-        return storePasswords(event);
+        return storeUserBackend(event);
     }
 
-    function storePasswords(event) {
+    async function storeUserBackend(event) {
         event.preventDefault();
 
         var username = document.getElementById("username").value;
         var password = document.getElementById("password").value;
-        var confirm = document.getElementById("confirm_password").value;
         var email = document.getElementById("email").value;
         var display = document.getElementById("message-display");
-        var savedProfiles = JSON.parse(localStorage.getItem("profiles") || "[]");
-        for (var i = 0; i < savedProfiles.length; i++) {
-            if (savedProfiles[i].username === username) {
-                display.textContent = "Username already exists";
-                return false;
-            }
-        }
-        var newProfile = {
+
+        var userPayload = {
             username: username,
             password: password,
             email: email
         };
 
-        savedProfiles.push(newProfile);
-        localStorage.setItem("profiles", JSON.stringify(savedProfiles));
+        try {
+            var response = await fetch("http://localhost:8080/users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(userPayload)
+            });
 
-        display.className = "success";
-        display.textContent = "Registration successful! Redirecting...";
+            if (response.ok) {
+                display.className = "success";
+                display.textContent = "Registration successful! Redirecting...";
+                setTimeout(function () {
+                    window.location.href = "login.html";
+                }, 1500);
+            } else {
+                display.textContent = "Server error: Username or Email might already exist.";
+            }
+        } catch (error) {
+            console.error(error);
+            display.textContent = "Connection failed. Please verify the backend is running.";
+        }
 
-        setTimeout(function () {
-            window.location.href = "login.html";
-        }, 1500);
         return true;
     }   
 </script>
